@@ -14,9 +14,10 @@ Interfaz de usuario desarrollada con React + Vite para la gestión de reservas d
 
 ## 📦 Instalación
 
-git clone [Link del repositorio]
-cd frontend
-npm install
-npm run dev
+- git clone [\[Link del repositorio\]](https://github.com/estefano99/reservas-front.git)
+- cd frontend
+- npm install
+- npm run dev
 
+## 📝 Variables de entorno
 VITE_BACK_URL=http://127.0.0.1:8000/api
