@@ -3,13 +3,8 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import SidebarNav from "./SidebarNav";
 import { Button } from "../ui/button";
 import SidebarLink from "./SidebarLink";
-import { useAuth } from "@/hooks/useAuth";
 
-const Sidebar = () => {
-  const { data: user, isLoading } = useAuth();
-
-  if (isLoading) return <div>Cargando...</div>;
-
+const Sidebar = ({ user }) => {
   return (
     <div className="h-14 absolute md:relative md:h-full w-1/5 2xl:w-[22%] md:border-r md:bg-muted/40 md:block">
       <div className="hidden md:flex h-full flex-col gap-2">
@@ -20,12 +15,17 @@ const Sidebar = () => {
           </p>
         </div>
         <div className="flex-1">
-          <SidebarNav
-            links={[
-              { title: "Reservas", icon: Package },
-              { title: "Espacios", icon: Tag },
-            ]}
-          />
+          {user.role === "user" && (
+            <SidebarNav links={[{ title: "Reservas", icon: Package }]} />
+          )}
+          {user.role === "admin" && (
+            <SidebarNav
+              links={[
+                { title: "Espacios", icon: Tag },
+                { title: "Reservas pendientes", icon: Tag },
+              ]}
+            />
+          )}
         </div>
         <div className="w-full flex flex-col justify-center h-20">
           <SidebarLink

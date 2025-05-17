@@ -15,7 +15,7 @@ import {
   CardContent,
 } from "@/components/ui/card";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { FormProvider, useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
@@ -47,6 +47,7 @@ export function Login() {
     },
   });
 
+  const queryClient = useQueryClient();
   const navigate = useNavigate();
 
   const mutation = useMutation({
@@ -55,12 +56,15 @@ export function Login() {
       console.log(error);
       toast.error(error.message || "Hubo un error al iniciar sesión");
     },
-    onSuccess: (data) => {
-      console.log("dataOnsuccess ", data);
+    onSuccess: async (data) => {
+      console.log(data);
+      await queryClient.invalidateQueries({ queryKey: ["user"] });
       if (data.user.role === "admin") {
         return navigate(routes.spacesFront);
       }
-      return navigate(routes.reservationsFront);
+      if (data.user.role === "user") {
+        return navigate(routes.reservationsFront);
+      }
     },
   });
 

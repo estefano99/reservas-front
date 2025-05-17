@@ -14,6 +14,18 @@ export const getReservations = async () => {
   }
 };
 
+export const getReservationsPending = async () => {
+  try {
+    const { data } = await clienteAxios.get(routes.reservationsPending);
+    return data;
+  } catch (error) {
+    if (isAxiosError(error) && error.response) {
+      throw new Error(error.response.data.message);
+    }
+    throw error;
+  }
+};
+
 export const getSlots = async (spaceId, date) => {
   console.log(spaceId, date);
   const { data } = await clienteAxios.get("/reservations/by-space", {
@@ -36,6 +48,14 @@ export const createReservation = async (values) => {
     }
     throw error;
   }
+};
+
+export const updateReservation = async ({ id, status }) => {
+  const { data } = await clienteAxios.patch(
+    `${routes.reservationsPending}/${id}/status`,
+    { status }
+  );
+  return data;
 };
 
 export const cancelReservation = async (id) => {

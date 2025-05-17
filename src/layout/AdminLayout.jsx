@@ -4,13 +4,13 @@ import { useAuth } from "@/hooks/useAuth";
 import { useEffect } from "react";
 import { Outlet, useNavigate } from "react-router-dom";
 
-const UserLayout = () => {
+const AdminLayout = () => {
   const navigate = useNavigate();
   const { data, isError, isLoading } = useAuth();
   useEffect(() => {
     if (isLoading) return;
 
-    if (isError || (data && data.role !== "user")) {
+    if (isError || (data && data.role !== "admin")) {
       navigate("/");
     }
   }, [isLoading, isError, data, navigate]);
@@ -25,4 +25,4 @@ const UserLayout = () => {
   );
 };
 
-export default UserLayout;
+export default AdminLayout;

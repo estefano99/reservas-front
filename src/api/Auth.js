@@ -5,7 +5,7 @@ import { isAxiosError } from "axios";
 export const login = async (user) => {
   try {
     const { data } = await clienteAxios.post(routes.login, user);
-    console.log(data)
+    console.log(data);
     localStorage.setItem("AUTH_TOKEN", data.access_token);
     return data;
   } catch (error) {
@@ -18,9 +18,22 @@ export const login = async (user) => {
 
 export const getUser = async () => {
   try {
-    const { data } = await clienteAxios(obtenerUsuarioRoute);
-    console.log(data)
+    const { data } = await clienteAxios(routes.getUser);
+    console.log(data);
     return data;
+  } catch (error) {
+    if (isAxiosError(error) && error.response) {
+      throw new Error(error.response.data.message);
+    }
+    throw error;
+  }
+};
+
+export const logoutAuth = async () => {
+  try {
+    const { data } = await clienteAxios.post(routes.logout);
+    localStorage.removeItem("AUTH_TOKEN");
+    console.log(data);
   } catch (error) {
     if (isAxiosError(error) && error.response) {
       throw new Error(error.response.data.message);

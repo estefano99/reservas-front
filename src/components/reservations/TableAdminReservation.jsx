@@ -1,37 +1,47 @@
 import { Button } from "../ui/button";
 import { useNavigate } from "react-router-dom";
-import { CircleX } from "lucide-react";
 import { useState } from "react";
 import { CancelModal } from "./CancelModal";
-import { routes } from "@/lib/routes";
+import { useQueryClient, useMutation } from "@tanstack/react-query";
+import { toast } from "sonner";
+import { updateReservation } from "@/api/ReservationApi";
+import { BadgeStatus } from "../Badge";
 
-const TableReservation = ({ reservations }) => {
+const TableAdminReservation = ({ reservations }) => {
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedReservation, setSelectedReservation] = useState(null);
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
-  const handleClick = () => {
-    navigate(routes.reservationsCrearFront);
-  };
+  console.log(reservations);
 
-  const handleCancel = (reservation) => {
-    if (reservation.status === "cancelled") {
-      return;
-    }
-    setSelectedReservation(reservation);
-    setModalOpen(true);
+  const mutation = useMutation({
+    mutationFn: updateReservation,
+    onError: (error) => {
+      console.error(error);
+      toast.error(error.message || "Hubo un error al actualizar la reserva");
+    },
+    onSuccess: (data) => {
+      toast.success(data.message || "Reserva actualizada correctamente");
+      queryClient.invalidateQueries({ queryKey: ["reservationsPending"] });
+    },
+  });
+
+  const handleStatusChange = async (reservation, newStatus) => {
+    await mutation.mutateAsync({
+      id: reservation.id,
+      status: newStatus,
+    });
   };
 
   return (
     <div className="w-11/12 mx-auto overflow-x-auto">
-      <div onClick={handleClick} className="flex justify-end mb-4">
-        <Button variant={"secondary"} className="cursor-pointer">
-          Reservar turno
-        </Button>
-      </div>
       <table className="min-w-full divide-y divide-gray-200 border rounded-md">
         <thead className="bg-gray-100">
           <tr>
+            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+              Usuario
+            </th>
             <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
               Espacio
             </th>
@@ -59,6 +69,9 @@ const TableReservation = ({ reservations }) => {
                 }`}
               >
                 <td className="px-4 py-2 text-sm text-gray-700">
+                  {res.user.name}
+                </td>
+                <td className="px-4 py-2 text-sm text-gray-700">
                   {res.space?.name ?? "Sin espacio"}
                 </td>
                 <td className="px-4 py-2 text-sm text-gray-700">
@@ -68,17 +81,29 @@ const TableReservation = ({ reservations }) => {
                   {res.end_time}
                 </td>
                 <td className="px-4 py-2 text-sm text-gray-700 capitalize">
-                  {res.status}
+                  {<BadgeStatus status={res.status} />}
                 </td>
                 <td
-                  onClick={() => handleCancel(res)}
-                  className={`px-4 py-2 text-sm text-red-600 hover:underline ${
+                  className={`space-x-2 space-y-2 md:space-y-0 py-2 text-sm hover:underline ${
                     res.status === "cancelled"
                       ? "cursor-not-allowed"
                       : "cursor-pointer"
                   }`}
                 >
-                  <CircleX className="h-6 w-6" />
+                  <Button
+                    onClick={() => handleStatusChange(res, "approved")}
+                    variant="success"
+                    className="cursor-pointer bg-green-500 hover:bg-green-400"
+                  >
+                    Aprobar
+                  </Button>
+                  <Button
+                    onClick={() => handleStatusChange(res, "rejected")}
+                    variant="destructive"
+                    className="cursor-pointer"
+                  >
+                    Rechazar
+                  </Button>
                 </td>
               </tr>
             ))
@@ -108,4 +133,4 @@ const TableReservation = ({ reservations }) => {
   );
 };
 
-export default TableReservation;
+export default TableAdminReservation;
