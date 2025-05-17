@@ -1,111 +1,93 @@
-import { useState } from "react";
-import { CalendarIcon, Clock } from "lucide-react";
+import { Button } from "../ui/button";
+import { Clock, House } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { useMutation } from "@tanstack/react-query";
+import { toast } from "sonner";
+import { createReservation, getSlots } from "@/api/ReservationApi";
+import { format } from "date-fns";
 
 export function ReservationModal({
   isOpen,
   onClose,
-  onConfirm,
   space,
   date,
   timeSlot,
+  setTimeSlots,
 }) {
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [notes, setNotes] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-    setTimeout(() => {
-      onConfirm(name, email, notes);
-      setIsSubmitting(false);
-    }, 1000);
+  const fetchSlots = async () => {
+    const formattedDate = format(date, "yyyy-MM-dd");
+    const data = await getSlots(space.id, formattedDate);
+    return data;
   };
 
-  if (!isOpen) return null;
+  const mutation = useMutation({
+    mutationFn: createReservation,
+    onError: (error) => {
+      console.log(error);
+      toast.error(error.message || "Hubo un error al generar la reserva");
+    },
+    onSuccess: async (respuesta) => {
+      toast(respuesta.message || "Reserva generada correctamente");
+
+      const updatedSlots = await fetchSlots();
+      setTimeSlots(updatedSlots);
+
+      onClose();
+    },
+  });
+
+  async function onSubmit(e) {
+    e.preventDefault();
+    console.log(format(date, "yyyy-MM-dd") + " " + timeSlot.start_time);
+    console.log(format(date, "yyyy-MM-dd") + " " + timeSlot.end_time);
+    const values = {
+      space_id: space.id,
+      start_time: format(date, "yyyy-MM-dd") + " " + timeSlot.start_time,
+      end_time: format(date, "yyyy-MM-dd") + " " + timeSlot.end_time,
+    };
+    await mutation.mutateAsync(values);
+  }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-      <div className="bg-white rounded-lg shadow-lg w-full max-w-md p-6 relative animate-fade-in">
-        <h2 className="text-xl font-bold mb-1">Confirmar Reserva</h2>
-        <p className="text-sm text-gray-600 mb-4">
-          Completa tus datos para reservar el turno seleccionado.
-        </p>
-
-        <form onSubmit={handleSubmit} className="space-y-5">
-          <div className="bg-gray-100 p-4 rounded-md space-y-2 text-sm">
-            <div className="flex items-center gap-2 text-gray-700">
-              <CalendarIcon className="h-4 w-4" />
-              {date.toLocaleDateString()}
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="sm:max-w-[500px]">
+        <form onSubmit={onSubmit}>
+          <DialogHeader>
+            <DialogTitle>
+              ¿Estás seguro que deseas confirmar la reserva?
+            </DialogTitle>
+            <DialogDescription>
+              Pasará a estar pendiente, hasta que el administrador la apruebe o
+              la rechace.
+            </DialogDescription>
+            <div className="flex flex-col gap-4 text-sm bg-gray-200 text-black p-4 rounded-md">
+              <div className="flex items-center gap-2">
+                <House className="h-4 w-4 text-muted-foreground" />
+                <span className="text-sm font-medium">{space.name}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Clock className="h-4 w-4 text-muted-foreground" />
+                <span className="text-sm font-medium">
+                  {timeSlot.start_time} - {timeSlot.end_time}
+                </span>
+              </div>
             </div>
-            <div className="flex items-center gap-2 text-gray-700">
-              <Clock className="h-4 w-4" />
-              {timeSlot.startTime} - {timeSlot.endTime}
-            </div>
-            <div className="font-medium">{space.name}</div>
-            <div className="text-xs text-gray-500">{space.location}</div>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium mb-1" htmlFor="name">
-              Nombre completo
-            </label>
-            <input
-              id="name"
-              required
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium mb-1" htmlFor="email">
-              Correo electrónico
-            </label>
-            <input
-              id="email"
-              type="email"
-              required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium mb-1" htmlFor="notes">
-              Notas adicionales (opcional)
-            </label>
-            <textarea
-              id="notes"
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              placeholder="Detalles adicionales sobre tu reserva..."
-              rows={3}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
-            />
-          </div>
-
-          <div className="flex justify-end gap-2 pt-2">
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-4 py-2 text-sm border rounded-md text-gray-700 hover:bg-gray-100"
-            >
+          </DialogHeader>
+          <DialogFooter className={"mt-4"}>
+            <Button type="button" variant="outline" onClick={onClose}>
               Cancelar
-            </button>
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className="px-4 py-2 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
-            >
-              {isSubmitting ? "Confirmando..." : "Confirmar Reserva"}
-            </button>
-          </div>
+            </Button>
+            <Button type="submit">Confirmar</Button>
+          </DialogFooter>
         </form>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 }

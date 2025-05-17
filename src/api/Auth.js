@@ -19,6 +19,7 @@ export const login = async (user) => {
 export const getUser = async () => {
   try {
     const { data } = await clienteAxios(obtenerUsuarioRoute);
+    console.log(data)
     return data;
   } catch (error) {
     if (isAxiosError(error) && error.response) {

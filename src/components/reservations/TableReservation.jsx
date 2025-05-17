@@ -1,12 +1,24 @@
-import React from "react";
 import { Button } from "../ui/button";
 import { useNavigate } from "react-router-dom";
+import { CircleX } from "lucide-react";
+import { useState } from "react";
+import { CancelModal } from "./CancelModal";
 
 const TableReservation = ({ reservations }) => {
+  const [modalOpen, setModalOpen] = useState(false);
+  const [selectedReservation, setSelectedReservation] = useState(null);
   const navigate = useNavigate();
 
   const handleClick = () => {
-    navigate("/reservations/create");
+    navigate("/reservas/crear");
+  };
+
+  const handleCancel = (reservation) => {
+    if (reservation.status === "cancelled") {
+      return;
+    }
+    setSelectedReservation(reservation);
+    setModalOpen(true);
   };
 
   return (
@@ -39,7 +51,12 @@ const TableReservation = ({ reservations }) => {
         <tbody className="divide-y divide-gray-200 bg-white">
           {reservations.length ? (
             reservations.map((res) => (
-              <tr key={res.id} className="hover:bg-gray-50">
+              <tr
+                key={res.id}
+                className={`${
+                  res.status === "cancelled" ? "bg-red-100" : "hover:bg-gray-50"
+                }`}
+              >
                 <td className="px-4 py-2 text-sm text-gray-700">
                   {res.space?.name ?? "Sin espacio"}
                 </td>
@@ -52,8 +69,15 @@ const TableReservation = ({ reservations }) => {
                 <td className="px-4 py-2 text-sm text-gray-700 capitalize">
                   {res.status}
                 </td>
-                <td className="px-4 py-2 text-sm text-blue-600 hover:underline cursor-pointer">
-                  Editar
+                <td
+                  onClick={() => handleCancel(res)}
+                  className={`px-4 py-2 text-sm text-red-600 hover:underline ${
+                    res.status === "cancelled"
+                      ? "cursor-not-allowed"
+                      : "cursor-pointer"
+                  }`}
+                >
+                  <CircleX className="h-6 w-6" />
                 </td>
               </tr>
             ))
@@ -69,6 +93,16 @@ const TableReservation = ({ reservations }) => {
           )}
         </tbody>
       </table>
+      {modalOpen && (
+        <CancelModal
+          isOpen={modalOpen}
+          reservation={selectedReservation}
+          onClose={() => {
+            setModalOpen(false);
+            setSelectedReservation(null);
+          }}
+        />
+      )}
     </div>
   );
 };
