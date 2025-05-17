@@ -10,7 +10,7 @@ const AdminLayout = () => {
   useEffect(() => {
     if (isLoading) return;
 
-    if (isError || (data && data.role !== "admin")) {
+    if ((isError && !data) || (data && data.role !== "admin")) {
       navigate("/");
     }
   }, [isLoading, isError, data, navigate]);

@@ -6,8 +6,8 @@ import SidebarLink from "./SidebarLink";
 
 const Sidebar = ({ user }) => {
   return (
-    <div className="h-14 absolute md:relative md:h-full w-1/5 2xl:w-[22%] md:border-r md:bg-muted/40 md:block">
-      <div className="hidden md:flex h-full flex-col gap-2">
+    <div className="min-h-screen absolute md:relative md:h-full w-1/5 2xl:w-[22%] md:border-r md:bg-muted/40 md:block">
+      <div className="hidden min-h-screen md:flex h-full flex-col gap-2">
         <div className="flex h-14 items-center border-b px-4 lg:h-[60px] lg:px-6">
           <p className="flex items-center gap-2 font-semibold">
             {/* <Package2 className="h-6 w-6" /> */}

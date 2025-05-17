@@ -9,7 +9,6 @@ export function CalendarPicker({ selectedDate, onDateChange }) {
         mode="single"
         selected={selectedDate}
         onSelect={(date) => date && onDateChange(date)}
-        className="rounded-md border"
         locale={es}
         fromDate={new Date()} // Solo fechas desde hoy en adelante
       />

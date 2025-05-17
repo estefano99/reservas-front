@@ -9,8 +9,9 @@ const UserLayout = () => {
   const { data, isError, isLoading } = useAuth();
   useEffect(() => {
     if (isLoading) return;
-
-    if (isError || (data && data.role !== "user")) {
+    console.log("isError: ", isError);
+    console.log("role: ", data.role);
+    if ((isError && !data) || (data && data.role !== "user")) {
       navigate("/");
     }
   }, [isLoading, isError, data, navigate]);

@@ -20,10 +20,11 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { FormProvider, useForm } from "react-hook-form";
 import { Link, useNavigate } from "react-router-dom";
 import { z } from "zod";
-import { login } from "@/api/Auth.js";
+import { login, register } from "@/api/Auth.js";
 import { routes } from "@/lib/routes";
 import { toast } from "sonner";
 import { Toaster } from "@/components/ui/sonner";
+import { useEffect } from "react";
 
 const formSchema = z.object({
   name: z.string().min(1, {
@@ -35,44 +36,66 @@ const formSchema = z.object({
   password: z.string().min(1, {
     message: "Contraseña es requerida",
   }),
+  confirmPassword: z.string().min(1, {
+    message: "Contraseña es requerida",
+  }),
 });
 
-export function Login() {
+export function Register() {
   const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: "",
       email: "",
       password: "",
+      confirmPassword: "",
     },
   });
 
   const queryClient = useQueryClient();
   const navigate = useNavigate();
 
+  const password = form.watch("password");
+  const confirmPassword = form.watch("confirmPassword");
+
   const mutation = useMutation({
-    mutationFn: login,
+    mutationFn: register,
     onError: (error) => {
       console.log(error);
-      toast.error(error.message || "Hubo un error al iniciar sesión");
+      toast.error(error.message || "Hubo un error al registrarte");
     },
     onSuccess: async (data) => {
-      console.log(data);
+      toast.success("Registrado correctamente");
       await queryClient.invalidateQueries({ queryKey: ["user"] });
-      if (data.user.role === "admin") {
-        console.log("entro admin");
-        return navigate(routes.spacesFront);
-      }
-      if (data.user.role === "user") {
-        console.log("entro user");
+      if (data.user?.role === "user") {
         return navigate(routes.reservationsFront);
       }
+      return navigate("/");
     },
   });
 
   async function onSubmit(values) {
-    await mutation.mutateAsync(values);
+    console.log(values);
+    const data = {
+      name: values.name,
+      email: values.email,
+      password: values.password,
+      password_confirmation: values.confirmPassword,
+    };
+    await mutation.mutateAsync(data);
   }
+
+  useEffect(() => {
+    if (password !== confirmPassword) {
+      form.setError("confirmPassword", {
+        type: "custom",
+        message: "Las contraseñas no coinciden",
+      });
+      return;
+    }
+    form.clearErrors("confirmPassword");
+    return;
+  }, [password, confirmPassword, form.watch]);
 
   return (
     <div className="min-h-screen flex flex-col md:flex-row">
@@ -81,7 +104,7 @@ export function Login() {
         <div className="absolute inset-0 flex items-center justify-center p-6">
           <div className="text-center space-y-4">
             <img
-              src="/icono-turnos.png"
+              src="/vite.svg"
               alt="Imagen de la app"
               className="rounded-lg shadow-lg mx-auto w-[600px] h-[400px] object-cover"
             />
@@ -107,10 +130,10 @@ export function Login() {
         <Card className="w-full max-w-md">
           <CardHeader className="space-y-1">
             <CardTitle className="text-2xl font-bold text-center">
-              Iniciar Sesión
+              Registrarse
             </CardTitle>
             <CardDescription className="text-center">
-              Ingrese sus credenciales para acceder al sistema
+              Ingrese sus credenciales para registrarse
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -166,8 +189,26 @@ export function Login() {
                     </FormItem>
                   )}
                 />
+                <FormField
+                  control={form.control}
+                  name="confirmPassword"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Confirmar contraseña</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="password"
+                          placeholder="Confirmar contraseña"
+                          {...field}
+                          autoComplete="off"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
                 <Button type="submit" className="w-full cursor-pointer">
-                  Ingresar
+                  Registrarse
                 </Button>
               </form>
             </FormProvider>
@@ -175,9 +216,9 @@ export function Login() {
         </Card>
         <div className="mt-4 text-center">
           <p className="text-sm text-muted-foreground">
-            ¿No tienes una cuenta?{" "}
-            <Link className="underline text-blue-500" to={routes.registerFront}>
-              Regístrate
+            Ya tienes una cuenta?{" "}
+            <Link className="underline text-blue-500" to={"/"}>
+              Inicia sesión
             </Link>
           </p>
         </div>

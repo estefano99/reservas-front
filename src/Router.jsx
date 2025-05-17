@@ -7,12 +7,14 @@ import Spaces from "./pages/Spaces";
 import { CreateReservation } from "./components/reservations/CreateReservation";
 import AdminLayout from "./layout/AdminLayout";
 import ReservationsAdmin from "./pages/ReservationsAdmin";
+import { Register } from "./pages/Register";
 
 const Router = () => {
   return (
     <BrowserRouter>
       <Routes>
         <Route index path="/" element={<Login />} />
+        <Route index path="/registrar" element={<Register />} />
 
         <Route element={<UserLayout />}>
           <Route path={routes.reservationsFront} element={<Reservations />} />

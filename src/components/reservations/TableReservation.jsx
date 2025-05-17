@@ -4,6 +4,7 @@ import { CircleX } from "lucide-react";
 import { useState } from "react";
 import { CancelModal } from "./CancelModal";
 import { routes } from "@/lib/routes";
+import { BadgeStatus } from "../Badge";
 
 const TableReservation = ({ reservations }) => {
   const [modalOpen, setModalOpen] = useState(false);
@@ -15,7 +16,7 @@ const TableReservation = ({ reservations }) => {
   };
 
   const handleCancel = (reservation) => {
-    if (reservation.status === "cancelled") {
+    if (reservation.status === "cancelled" || reservation.status === "rejected") {
       return;
     }
     setSelectedReservation(reservation);
@@ -52,12 +53,7 @@ const TableReservation = ({ reservations }) => {
         <tbody className="divide-y divide-gray-200 bg-white">
           {reservations.length ? (
             reservations.map((res) => (
-              <tr
-                key={res.id}
-                className={`${
-                  res.status === "cancelled" ? "bg-red-100" : "hover:bg-gray-50"
-                }`}
-              >
+              <tr key={res.id} className={"hover:bg-gray-50"}>
                 <td className="px-4 py-2 text-sm text-gray-700">
                   {res.space?.name ?? "Sin espacio"}
                 </td>
@@ -68,12 +64,12 @@ const TableReservation = ({ reservations }) => {
                   {res.end_time}
                 </td>
                 <td className="px-4 py-2 text-sm text-gray-700 capitalize">
-                  {res.status}
+                  {<BadgeStatus status={res.status} />}
                 </td>
                 <td
                   onClick={() => handleCancel(res)}
                   className={`px-4 py-2 text-sm text-red-600 hover:underline ${
-                    res.status === "cancelled"
+                    res.status === "cancelled" || res.status === "rejected"
                       ? "cursor-not-allowed"
                       : "cursor-pointer"
                   }`}

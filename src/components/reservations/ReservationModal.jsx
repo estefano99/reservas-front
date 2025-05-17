@@ -1,5 +1,5 @@
 import { Button } from "../ui/button";
-import { Clock, House } from "lucide-react";
+import { Calendar, Clock, House } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -11,6 +11,7 @@ import {
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { createReservation, getSlots } from "@/api/ReservationApi";
+import { fomatDate } from "@/lib/helpers";
 import { format } from "date-fns";
 
 export function ReservationModal({
@@ -34,7 +35,7 @@ export function ReservationModal({
       toast.error(error.message || "Hubo un error al generar la reserva");
     },
     onSuccess: async (respuesta) => {
-      toast(respuesta.message || "Reserva generada correctamente");
+      toast.success(respuesta.message || "Reserva generada correctamente");
 
       const updatedSlots = await fetchSlots();
       setTimeSlots(updatedSlots);
@@ -54,7 +55,7 @@ export function ReservationModal({
     };
     await mutation.mutateAsync(values);
   }
-
+  console.log(date);
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[500px]">
@@ -71,6 +72,10 @@ export function ReservationModal({
               <div className="flex items-center gap-2">
                 <House className="h-4 w-4 text-muted-foreground" />
                 <span className="text-sm font-medium">{space.name}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Calendar className="h-4 w-4 text-muted-foreground" />
+                <span className="text-sm font-medium">{fomatDate(date)}</span>
               </div>
               <div className="flex items-center gap-2">
                 <Clock className="h-4 w-4 text-muted-foreground" />

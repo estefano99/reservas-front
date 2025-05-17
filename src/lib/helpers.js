@@ -15,7 +15,7 @@ export const reservationStatus = {
     color: "text-green-600",
     bg: "bg-green-100",
   },
-  canceled: {
+  cancelled: {
     label: "Cancelado",
     color: "text-gray-600",
     bg: "bg-gray-100",

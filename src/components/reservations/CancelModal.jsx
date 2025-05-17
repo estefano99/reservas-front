@@ -38,32 +38,34 @@ export function CancelModal({ isOpen, reservation, onClose }) {
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[500px]">
-        <form onSubmit={onSubmit}>
-          <DialogHeader className="mb-2">
-            <DialogTitle>
-              ¿Estás seguro que deseas cancelar la reserva?
-            </DialogTitle>
-            <DialogDescription className="text-yellow-500 font-bold">
-              El proceso es irreversible
-            </DialogDescription>
-          </DialogHeader>
-          <p>Espacio: {reservation.space.name}</p>
-          <p>Inicio: {reservation.start_time}</p>
-          <p>Fin: {reservation.end_time}</p>
-          <DialogFooter className={"mt-4"}>
-            <Button
-              className="cursor-pointer"
-              type="button"
-              variant="outline"
-              onClick={onClose}
-            >
-              Cancelar
-            </Button>
-            <Button className="cursor-pointer" type="submit">
-              Confirmar
-            </Button>
-          </DialogFooter>
-        </form>
+        <div>
+          <form onSubmit={onSubmit}>
+            <DialogHeader className="mb-2">
+              <DialogTitle>
+                ¿Estás seguro que deseas cancelar la reserva?
+              </DialogTitle>
+              <DialogDescription className="text-yellow-500 font-bold">
+                El proceso es irreversible
+              </DialogDescription>
+            </DialogHeader>
+            <p>Espacio: {reservation.space.name}</p>
+            <p>Inicio: {reservation.start_time}</p>
+            <p>Fin: {reservation.end_time}</p>
+            <DialogFooter className={"mt-4"}>
+              <Button
+                className="cursor-pointer"
+                type="button"
+                variant="outline"
+                onClick={onClose}
+              >
+                Cancelar
+              </Button>
+              <Button className="cursor-pointer" type="submit">
+                Confirmar
+              </Button>
+            </DialogFooter>
+          </form>
+        </div>
       </DialogContent>
     </Dialog>
   );

@@ -11,6 +11,8 @@ const SidebarLink = ({ redirectTo, linkTitle, linkIcon: LinkIcon }) => {
   const logout = async () => {
     await logoutAuth();
     queryClient.invalidateQueries({ queryKey: ["user"] });
+    queryClient.invalidateQueries({ queryKey: ["reservations"], exact: true });
+    navigate("/");
   };
 
   const isActive = location.pathname === `/${redirectTo}`;
